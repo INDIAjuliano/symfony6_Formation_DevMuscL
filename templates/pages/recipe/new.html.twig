@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+ SymeRecipe - Nouvelle recette
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1 class="mt-4">Création d'une Recette 🎃</h1>
+
+        {{ form_start(form) }}
+
+        <div class="form-group">
+            {{ form_label(form.name)}}
+            {{ form_widget(form.name) }}
+            <div class="form_error">
+            {{ form_errors(form.name) }}
+            </div>
+        </div>
+
+        <!-- Les autres champs du formulaire -->
+
+        {{ form_label(form.ingredients) }}
+        {{ form_widget(form.ingredients) }}
+        <div class="form_error">
+            {{ form_errors(form.ingredients) }}
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
