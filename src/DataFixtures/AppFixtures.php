@@ -57,6 +57,17 @@ class AppFixtures extends Fixture
             }   
                 $manager->persist($recipe);
         }
+
+        // Users
+        for ($i = 0; $i < 10; $i++){
+            $user = new User();
+            $user->setFullName($this->faker->name())
+                ->setPseudo(mt_rand(0, 0) === 1 ? $this->faker->firstName() : null)
+                ->setEmail($this->faker->email())
+                ->setRoles(['ROLE_USER'])
+                ->setPassword('password');
+            $manager->persist($user);
+        }
         $manager->flush();
     }
 }
