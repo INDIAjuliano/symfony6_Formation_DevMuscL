@@ -21,10 +21,12 @@ class AppFixtures extends Fixture
      * @var Generator
      */
     private Generator $faker;
-    public function __construct()
+    private UserPasswordHasherInterface $hasher;
+    public function __construct(UserPasswordHasherInterface $hasher )
     { 
         // Pour avoir des données en français
         $this->faker = Factory::create('fr_FR');
+        $this->hasher = $hasher;
     }    
     public function load(ObjectManager $manager): void
     {
@@ -64,8 +66,13 @@ class AppFixtures extends Fixture
             $user->setFullName($this->faker->name())
                 ->setPseudo(mt_rand(0, 0) === 1 ? $this->faker->firstName() : null)
                 ->setEmail($this->faker->email())
-                ->setRoles(['ROLE_USER'])
-                ->setPassword('password');
+                ->setRoles(['ROLE_USER']);
+        $hashPassword = $this->hasher->hashPassword(
+            $user,
+            'password'
+        );
+
+            $user->setPassword($hashPassword);
             $manager->persist($user);
         }
         $manager->flush();
