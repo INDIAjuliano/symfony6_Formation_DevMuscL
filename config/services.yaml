@@ -22,6 +22,9 @@ services:
     App\EntityListener\:
         resource: "../src/EntityListener"
         tags: ["doctrine.orm.entity_listener"]
+        # Cette ligne définit les balises associées au service. 
+        # Dans ce cas, la balise doctrine.orm.entity_listener indique que
+        #  ce service est un écouteur d'entités utilisé par Doctrine pour écouter les événements relatifs aux entités.
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
