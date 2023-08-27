@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\User;
+use App\Form\RegistrationFormType;
+use App\Form\UserType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+
+class UserController extends AbstractController
+{
+   
+    #[Route("/utilisateur/edition/{id}", name:"user.edit")]
+    public function index(User $user): Response
+    {
+        //  pour verifier si un autre user modifier un compte d'un autre utilisateur
+        if (!$this->getUser()) {
+            // pour verifier s'il est connecté ou pas!
+            return $this->redirectToRoute('security.login');
+        }
+
+        // Verifier si l'user courant est l'user  à modifier
+        if($this->getUser() === $user) {
+            return $this->redirectToRoute('recipe.index');
+        }
+        // création d'un formulair
+        $form = $this->createForm(UserType::class, $user);
+
+        return $this->render('registration/register.html.twig', [
+            'Userform' => $form->createView(),
+        ]);
+    }
+}

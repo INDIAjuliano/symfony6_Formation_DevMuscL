@@ -83,23 +83,12 @@ class IngredientController extends AbstractController
      */
 
      // --------------------------- à vérifier : non opérationnel (injection d'ingredient) ----------------------------
-    #[Route('/ingredient/edition/{id}', name: "ingredient.edit", methods: ['GET', 'POST'])]
-
-    /**
-    * @Route('/ingredient/edition/{id}', name="ingredient.edit", methods={"GET","POST"})
-    * @ParamConverter("ingredient", class="App\Entity\Ingredient")
-    */
+     #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
     public function edit(
-        IngredientRepository $repository,
-        // Ingredient $ingredient,
-        Int $id,
+        Ingredient $ingredient,
         Request $request,
         EntityManagerInterface $manager
     ): Response {
-        $ingredient = $repository->findOneBy(["id" => $id]);
-
-
-
         $form = $this->createForm(IngredientType::class, $ingredient);
         $form->handleRequest($request);
 

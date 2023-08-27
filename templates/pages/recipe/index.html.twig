@@ -13,7 +13,7 @@
             </a>
 
             {# read and display just one flash message type #}
-                {% for message in app.flashes('notice') %}
+                {% for message in app.flashes('success') %}
                     <div class="alert alert-success mt-4">
                         {{ message }}
                     </div>
