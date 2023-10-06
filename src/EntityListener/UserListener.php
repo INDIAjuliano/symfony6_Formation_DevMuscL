@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\EntityListener;
 
@@ -13,27 +13,26 @@ class UserListener
     {
         $this->hasher = $hasher;
     }
+
     public function prePersist(User $user)
     {
         $this->encodePassword($user);
     }
 
-    
     public function preUpdate(User $user)
     {
         $this->encodePassword($user);
     }
 
     /**
-     * Encode Password based on Plai
+     * Encode password based on plain password
      *
      * @param User $user
      * @return void
      */
-
     public function encodePassword(User $user)
     {
-        if ($plain = $user->getPlainPassword() === null) {
+        if ($user->getPlainPassword() === null) {
             return;
         }
 
@@ -43,5 +42,7 @@ class UserListener
                 $user->getPlainPassword()
             )
         );
+
+        $user->setPlainPassword(null);
     }
 }

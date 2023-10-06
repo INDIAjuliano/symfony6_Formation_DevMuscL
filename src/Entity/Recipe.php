@@ -64,6 +64,10 @@ class Recipe
     #[ORM\ManyToMany(targetEntity: Ingredient::class)]
     private Collection $ingredients;
 
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'recipes')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $user;
+
     public function __construct()
     {
         $this->ingredients = new ArrayCollection();
@@ -198,6 +202,18 @@ class Recipe
     public function removeIngredient(Ingredient $ingredient): static
     {
         $this->ingredients->removeElement($ingredient);
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

@@ -5,46 +5,52 @@ namespace App\Controller;
 use App\Entity\Ingredient;
 use App\Form\IngredientType;
 use App\Repository\IngredientRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Doctrine\ORM\EntityManagerInterface;
-use PhpParser\Node\Expr\Cast\Int_;
 
 class IngredientController extends AbstractController
 {
-     /**
-      * this function display all ingredients
-      *
-      * @param IngredientRepository $repository
-      * @param PaginatorInterface $paginator
-      * @param Request $request
-      * @return Response
-      */
-
-    #[Route('/ingredient', 'ingredient.index', methods:['GET'])]
+    /**
+     * This controller display all ingredients
+     *
+     * @param IngredientRepository $repository
+     * @param PaginatorInterface $paginator
+     * @param Request $request
+     * @return Response
+     */
+    #[Route('/ingredient', name: 'ingredient.index', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function index(
         IngredientRepository $repository,
         PaginatorInterface $paginator,
         Request $request
-        ): Response {
+    ): Response {
         $ingredients = $paginator->paginate(
-            $repository->findAll(), /* query NOT result */
-            $request->query->getInt('page', 1), /*page number*/
-            10 /*limit per page*/
-            );
+            $repository->findBy(['user' => $this->getUser()]),
+            $request->query->getInt('page', 1),
+            10
+        );
 
-        // dd($ingredients);
         return $this->render('pages/ingredient/index.html.twig', [
-            'ingredients'=> $ingredients
+            'ingredients' => $ingredients
         ]);
     }
-    // le formulaire Creat (CRUD)
 
-    #[Route('/ingredient/nouveau', 'ingredient.new', methods : ['GET','POST'])] // la soumission de formulaire (Post)
+    /**
+     * This controller show a form which create an ingredient
+     *
+     * @param Request $request
+     * @param EntityManagerInterface $manager
+     * @return Response
+     */
+    #[Route('/ingredient/creation', 'ingredient.new')]
+    #[IsGranted('ROLE_USER')]
     public function new(
         Request $request,
         EntityManagerInterface $manager
@@ -59,31 +65,30 @@ class IngredientController extends AbstractController
 
             $manager->persist($ingredient);
             $manager->flush();
-            
-            //======== message flash ======
+
             $this->addFlash(
-                'notice',
-                'Votre ingrédinet a été créé avec succès !'
+                'success',
+                'Votre ingrédient a été créé avec succès !'
             );
 
-            return $this->redirectToRoute('ingredient_index');
-
+            return $this->redirectToRoute('ingredient.index');
         }
+
         return $this->render('pages/ingredient/new.html.twig', [
-            'form' => $form->createView() // créer la formulaire dans le vew
+            'form' => $form->createView()
         ]);
     }
 
     /**
-     * This controller allow us to create a new Ingredient
-     * 
-     * @param EntityManagerInterface $manager
+     * This controller allow us to edit an ingredient
+     *
+     * @param Ingredient $ingredient
      * @param Request $request
-      * @return Response
+     * @param EntityManagerInterface $manager
+     * @return Response
      */
-
-     // --------------------------- à vérifier : non opérationnel (injection d'ingredient) ----------------------------
-     #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
+    #[Route('/ingredient/edition/{id}', 'ingredient.edit', methods: ['GET', 'POST'])]
     public function edit(
         Ingredient $ingredient,
         Request $request,
@@ -111,37 +116,27 @@ class IngredientController extends AbstractController
         ]);
     }
 
-    
     /**
-     * this controller allow us to delete an ingredient
+     * This controller allows us to delete an ingredient
      *
      * @param EntityManagerInterface $manager
      * @param Ingredient $ingredient
      * @return Response
      */
-
-    #[Route('/ingredient/suppression/{id}',name:'ingredient.delete', methods: ['GET'])]
-
-    public function delete(EntityManagerInterface $manager, Ingredient $ingredient) : Response
-    {
-        if(!$ingredient){
-            //======== message flash ======
-        $this->addFlash(
-        'notice',
-        'L\' ingrédinet n\'a pas été trouvé!'
-    );
-        }
+    #[Route('/ingredient/suppression/{id}', 'ingredient.delete', methods: ['GET'])]
+    #[Security("is_granted('ROLE_USER') and user === ingredient.getUser()")]
+    public function delete(
+        EntityManagerInterface $manager,
+        Ingredient $ingredient
+    ): Response {
         $manager->remove($ingredient);
         $manager->flush();
 
-        //======== message flash ======
-    $this->addFlash(
-        'notice',
-        'Votre ingrédinet a été supprimé avec succès !'
-    );
+        $this->addFlash(
+            'success',
+            'Votre ingrédient a été supprimé avec succès !'
+        );
 
         return $this->redirectToRoute('ingredient.index');
     }
-    
 }
-
